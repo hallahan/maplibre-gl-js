@@ -79,6 +79,7 @@ import vector from '../source/vector_tile_source';
 import raster from '../source/raster_tile_source';
 import rasterDem from '../source/raster_dem_tile_source';
 import geojson from '../source/geojson_source';
+import custom from '../source/custom_vector_tile_source';
 import video from '../source/video_source';
 import image from '../source/image_source';
 import canvas from '../source/canvas_source';
@@ -90,6 +91,7 @@ const sourceTypes = {
     raster,
     'raster-dem': rasterDem,
     geojson,
+    custom,
     video,
     image,
     canvas

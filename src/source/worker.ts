@@ -21,6 +21,7 @@ import type {WorkerGlobalScopeInterface} from '../util/web_worker';
 import type {Callback} from '../types/callback';
 import type {LayerSpecification} from '../style-spec/types.g';
 import type {PluginState} from './rtl_text_plugin';
+import CustomVectorTileWorkerSource from './custom_vector_tile_worker_source';
 
 /**
  * @private
@@ -58,7 +59,8 @@ export default class Worker {
 
         this.workerSourceTypes = {
             vector: VectorTileWorkerSource,
-            geojson: GeoJSONWorkerSource
+            geojson: GeoJSONWorkerSource,
+            custom: CustomVectorTileWorkerSource
         };
 
         // [mapId][sourceType][sourceName] => worker source instance

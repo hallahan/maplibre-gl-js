@@ -35,7 +35,7 @@ var map = window.map = new maplibregl.Map({
     container: 'map',
     zoom: 12.5,
     center: [-77.01866, 38.888],
-    style: 'https://demotiles.maplibre.org/style.json',
+    style: '../integration/assets/styles/maplibre.json',
     hash: true
 });
 
@@ -59,10 +59,27 @@ map.on('load', function() {
         'data': '../integration/assets/data/linestring.geojson',
         'attribution': 'GeoJSON Attribution'
     });
+
+    map.addSource('custom_source', {
+        'type': 'custom',
+        'data': '../integration/assets/data/fc.geojson',
+        'attribution': 'GeoJSON Attribution'
+    });
+
     map.addLayer({
         'id': 'route',
         'type': 'line',
         'source': 'geojson',
+        'paint': {
+            'line-color': '#EC8D8D',
+            'line-width': {'base': 1.5, 'stops': [[5, 0.75], [18, 32]]}
+        }
+    });
+    
+    map.addLayer({
+        'id': 'pacman',
+        'type': 'line',
+        'source': 'custom_source',
         'paint': {
             'line-color': '#EC8D8D',
             'line-width': {'base': 1.5, 'stops': [[5, 0.75], [18, 32]]}
