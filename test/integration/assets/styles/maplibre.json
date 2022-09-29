@@ -529,7 +529,7 @@
     "bearing": 0,
     "sources": {
         "maplibre": {
-            "url": "https://demotiles.maplibre.org/tiles/tiles.json",
+            "url": "../integration/assets/styles/maplibretiles.json",
             "type": "vector"
         }
     },

@@ -56,14 +56,12 @@ map.addControl(new maplibregl.FullscreenControl());
 map.on('load', function() {
     map.addSource('geojson', {
         'type': 'geojson',
-        'data': '../integration/assets/data/linestring.geojson',
-        'attribution': 'GeoJSON Attribution'
+        'data': '../integration/assets/data/linestring.geojson'
     });
 
     map.addSource('custom_source', {
         'type': 'custom',
-        'data': '../integration/assets/data/fc.geojson',
-        'attribution': 'GeoJSON Attribution'
+        'data': '../integration/assets/data/fc.geojson'
     });
 
     map.addLayer({
