@@ -47,8 +47,6 @@ class CustomVectorTileSource extends Evented implements Source {
 
         this.id = id;
 
-        // `type` is a property rather than a constant to make it easy for 3rd
-        // parties to use GeoJSONSource to build their own source types.
         this.type = 'custom';
 
         this.minzoom = 0;
@@ -80,7 +78,6 @@ class CustomVectorTileSource extends Evented implements Source {
         // third-party sources to hack/reuse GeoJSONSource.
         this.workerOptions = extend({
             source: this.id,
-            cluster: options.cluster || false,
             geojsonVtOptions: {
                 buffer: (options.buffer !== undefined ? options.buffer : 128) * scale,
                 tolerance: (options.tolerance !== undefined ? options.tolerance : 0.375) * scale,
@@ -88,17 +85,7 @@ class CustomVectorTileSource extends Evented implements Source {
                 maxZoom: this.maxzoom,
                 lineMetrics: options.lineMetrics || false,
                 generateId: options.generateId || false
-            },
-            superclusterOptions: {
-                maxZoom: options.clusterMaxZoom !== undefined ? options.clusterMaxZoom : this.maxzoom - 1,
-                minPoints: Math.max(2, options.clusterMinPoints || 2),
-                extent: EXTENT,
-                radius: (options.clusterRadius || 50) * scale,
-                log: false,
-                generateId: options.generateId || false
-            },
-            clusterProperties: options.clusterProperties,
-            filter: options.filter
+            }
         }, options.workerOptions);
     }
 
@@ -126,69 +113,8 @@ class CustomVectorTileSource extends Evented implements Source {
         return this;
     }
 
-    /**
-     * For clustered sources, fetches the zoom at which the given cluster expands.
-     *
-     * @param clusterId The value of the cluster's `cluster_id` property.
-     * @param callback A callback to be called when the zoom value is retrieved (`(error, zoom) => { ... }`).
-     * @returns {GeoJSONSource} this
-     */
-    getClusterExpansionZoom(clusterId: number, callback: Callback<number>) {
-        this.actor.send('geojson.getClusterExpansionZoom', {clusterId, source: this.id}, callback);
-        return this;
-    }
-
-    /**
-     * For clustered sources, fetches the children of the given cluster on the next zoom level (as an array of GeoJSON features).
-     *
-     * @param clusterId The value of the cluster's `cluster_id` property.
-     * @param callback A callback to be called when the features are retrieved (`(error, features) => { ... }`).
-     * @returns {GeoJSONSource} this
-     */
-    getClusterChildren(clusterId: number, callback: Callback<Array<GeoJSON.Feature>>) {
-        this.actor.send('geojson.getClusterChildren', {clusterId, source: this.id}, callback);
-        return this;
-    }
-
-    /**
-     * For clustered sources, fetches the original points that belong to the cluster (as an array of GeoJSON features).
-     *
-     * @param clusterId The value of the cluster's `cluster_id` property.
-     * @param limit The maximum number of features to return.
-     * @param offset The number of features to skip (e.g. for pagination).
-     * @param callback A callback to be called when the features are retrieved (`(error, features) => { ... }`).
-     * @returns {GeoJSONSource} this
-     * @example
-     * // Retrieve cluster leaves on click
-     * map.on('click', 'clusters', function(e) {
-     *   var features = map.queryRenderedFeatures(e.point, {
-     *     layers: ['clusters']
-     *   });
-     *
-     *   var clusterId = features[0].properties.cluster_id;
-     *   var pointCount = features[0].properties.point_count;
-     *   var clusterSource = map.getSource('clusters');
-     *
-     *   clusterSource.getClusterLeaves(clusterId, pointCount, 0, function(error, features) {
-     *     // Print cluster leaves in the console
-     *     console.log('Cluster leaves:', error, features);
-     *   })
-     * });
-     */
-    getClusterLeaves(clusterId: number, limit: number, offset: number, callback: Callback<Array<GeoJSON.Feature>>) {
-        this.actor.send('geojson.getClusterLeaves', {
-            source: this.id,
-            clusterId,
-            limit,
-            offset
-        }, callback);
-        return this;
-    }
-
     /*
-     * Responsible for invoking WorkerSource's geojson.loadData target, which
-     * handles loading the geojson data and preparing to serve it up as tiles,
-     * using geojson-vt or supercluster as appropriate.
+     * TODO: Do something similar, but instead just give a list of tiles to refetch.
      */
     _updateWorkerData(sourceDataType: MapSourceDataType) {
         const options = extend({}, this.workerOptions);
@@ -203,9 +129,6 @@ class CustomVectorTileSource extends Evented implements Source {
         this._pendingLoads++;
         this.fire(new Event('dataloading', {dataType: 'source'}));
 
-        // target {this.type}.loadData rather than literally geojson.loadData,
-        // so that other geojson-like source types can easily reuse this
-        // implementation
         this.actor.send(`${this.type}.loadData`, options, (err, result) => {
             this._pendingLoads--;
 

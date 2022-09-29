@@ -24,11 +24,7 @@ export type LoadGeoJSONParameters = {
     request?: RequestParameters;
     data?: string;
     source: string;
-    cluster: boolean;
-    superclusterOptions?: any;
     geojsonVtOptions?: any;
-    clusterProperties?: any;
-    filter?: Array<unknown>;
 };
 
 export type LoadGeoJSON = (params: LoadGeoJSONParameters, callback: ResponseCallback<any>) => Cancelable;
@@ -76,8 +72,9 @@ class CustomVectorTileWorkerSource extends VectorTileWorkerSource {
 
     constructor(actor: Actor, layerIndex: StyleLayerIndex, availableImages: Array<string>, loadGeoJSON?: LoadGeoJSON | null) {
         super(actor, layerIndex, availableImages, loadTile);
+        
         if (loadGeoJSON) {
-            this.loadGeoJSON = loadGeoJSON;
+            this._loadGeoJSON = loadGeoJSON;
         }
     }
 
@@ -85,6 +82,7 @@ class CustomVectorTileWorkerSource extends VectorTileWorkerSource {
         resourceTiming?: {[_: string]: Array<PerformanceResourceTiming>};
         abandoned?: boolean;
     }>) {
+        
         this._pendingRequest?.cancel();
         if (this._pendingCallback) {
             // Tell the foreground the previous call has been abandoned
@@ -95,7 +93,7 @@ class CustomVectorTileWorkerSource extends VectorTileWorkerSource {
             new RequestPerformance(params.request) : false;
 
         this._pendingCallback = callback;
-        this._pendingRequest = this.loadGeoJSON(params, (err?: Error | null, data?: any | null) => {
+        this._pendingRequest = this._loadGeoJSON(params, (err?: Error | null, data?: any | null) => {
             delete this._pendingCallback;
             delete this._pendingRequest;
 
@@ -107,7 +105,7 @@ class CustomVectorTileWorkerSource extends VectorTileWorkerSource {
                 rewind(data, true);
 
                 try {
-                    this._vectorTilePlugin = geojsonvt(data, params.geojsonVtOptions);   
+                    this._vectorTilePlugin = geojsonvt(data, params.geojsonVtOptions);
                 } catch (err) {
                     return callback(err);
                 }
@@ -140,7 +138,7 @@ class CustomVectorTileWorkerSource extends VectorTileWorkerSource {
         }
     }
 
-    loadGeoJSON(params: LoadGeoJSONParameters, callback: ResponseCallback<any>): Cancelable {
+    _loadGeoJSON(params: LoadGeoJSONParameters, callback: ResponseCallback<any>): Cancelable {
         // Because of same origin issues, urls must either include an explicit
         // origin or absolute path.
         // ie: /foo/bar.json or http://example.com/bar.json
