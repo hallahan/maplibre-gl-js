@@ -195,9 +195,9 @@ class VectorTileSource extends Evented implements Source {
 
         if (!tile.actor || tile.state === 'expired') {
             tile.actor = this.dispatcher.getActor();
-            
+
             // Here is where we are telling an actor to load a tile in a worker thread.
-            
+            // If we need to fetch data instead from planet-core, this should happen here.
 
             tile.request = tile.actor.send('loadTile', params, done.bind(this));
         } else if (tile.state === 'loading') {
@@ -222,7 +222,10 @@ class VectorTileSource extends Evented implements Source {
                 tile.resourceTiming = data.resourceTiming;
 
             if (this.map._refreshExpiredTiles && data) tile.setExpiryData(data);
+
             // painter is just used to get style stuff
+            // This is loadVectorData with the main thread tile. 
+            // This done function is called in main after loadTile is done and the response has been parsed.
             tile.loadVectorData(data, this.map.painter);
 
             cacheEntryPossiblyAdded(this.dispatcher);
