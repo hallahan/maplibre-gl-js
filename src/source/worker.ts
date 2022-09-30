@@ -119,9 +119,11 @@ export default class Worker {
         callback();
     }
 
+    // Called by this.parent[task.type](task.sourceMapId, params, done); in processTask in actor.ts
     loadTile(mapId: string, params: WorkerTileParameters & {
         type: string;
     }, callback: WorkerTileCallback) {
+        // Calling VectorTileWorkerSource loadTile
         this.getWorkerSource(mapId, params.type, params.source).loadTile(params, callback);
     }
 

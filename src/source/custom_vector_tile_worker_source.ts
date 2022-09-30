@@ -34,6 +34,7 @@ interface VectorTilePlugin {
     getTile(z: number, x: number, y: number): any;
 }
 
+// set to this.loadVectorData in VectorTileWorkerSource
 function loadTile(params: WorkerTileParameters, callback: LoadVectorDataCallback): (() => void) | void {
     const canonical = params.tileID.canonical;
 
@@ -41,13 +42,12 @@ function loadTile(params: WorkerTileParameters, callback: LoadVectorDataCallback
         return callback(null, null);
     }
 
-    if (isWorker()) {
-        console.log('CustomVectorTileWorkerSource loadTile WORKER')
-    } else {
-        console.log('CustomVectorTileWorkerSource loadTile MAIN')
-    }
-
-    debugger
+    // if (isWorker()) {
+    //     console.log('CustomVectorTileWorkerSource loadTile WORKER')
+    // } else {
+    //     console.log('CustomVectorTileWorkerSource loadTile MAIN')
+    // }
+    // always called in a worker
 
     const geoJSONTile = this._vectorTilePlugin.getTile(canonical.z, canonical.x, canonical.y);
     if (!geoJSONTile) {

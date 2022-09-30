@@ -96,6 +96,7 @@ class VectorTileWorkerSource implements WorkerSource {
      * a `params.url` property) for fetching and producing a VectorTile object.
      * @private
      */
+    // called by loadTile in worker.ts
     loadTile(params: WorkerTileParameters, callback: WorkerTileCallback) {
         const uid = params.uid;
 
@@ -106,6 +107,7 @@ class VectorTileWorkerSource implements WorkerSource {
             new RequestPerformance(params.request) : false;
 
         const workerTile = this.loading[uid] = new WorkerTile(params);
+        // Calling loadTile in custom_vector_tile_worker_source.ts
         workerTile.abort = this.loadVectorData(params, (err, response) => {
             delete this.loading[uid];
 
