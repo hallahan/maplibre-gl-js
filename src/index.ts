@@ -20,7 +20,7 @@ import config from './util/config';
 import {Debug} from './util/debug';
 import {isSafari} from './util/util';
 import {setRTLTextPlugin, getRTLTextPluginStatus} from './source/rtl_text_plugin';
-import {setPlanetVectorTilePlugin} from './source/custom_vector_tile_source'}
+import {setPlanetVectorTilePlugin} from './source/custom_vector_tile_source';
 import WorkerPool from './util/worker_pool';
 import {prewarm, clearPrewarmedResources} from './util/global_worker_pool';
 import {clearTileCache} from './util/tile_request_cache';
