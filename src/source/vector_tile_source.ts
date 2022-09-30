@@ -176,6 +176,7 @@ class VectorTileSource extends Evented implements Source {
         return extend({}, this._options);
     }
 
+    // called by SourceCache _loadTile
     loadTile(tile: Tile, callback: Callback<void>) {
         const url = tile.tileID.canonical.url(this.tiles, this.map.getPixelRatio(), this.scheme);
         const params = {
@@ -194,9 +195,10 @@ class VectorTileSource extends Evented implements Source {
 
         if (!tile.actor || tile.state === 'expired') {
             tile.actor = this.dispatcher.getActor();
-            // Here is where we are telling an actor to load a tile in a worker thread.
-            debugger
             
+            // Here is where we are telling an actor to load a tile in a worker thread.
+            
+
             tile.request = tile.actor.send('loadTile', params, done.bind(this));
         } else if (tile.state === 'loading') {
             // schedule tile reloading after it has been loaded

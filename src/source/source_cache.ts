@@ -159,7 +159,16 @@ class SourceCache extends Evented {
         if (this.transform) this.update(this.transform, this.terrain);
     }
 
+    // The thing that tells the source to load the tile, called by _addTile and _reloadTile
+
+    // _loadTile                -   This Function
+    // _addTile                 -   Pull tile from cache if present, use that. Otherwise, call _loadTile to load it
+    // _updateRetainedTiles     -   Retain tiles we need to keep, even if not loaded, but also call _addTile to load them. Add to missing tiles for tiles we don't have
+    // update                   -   Removes tiles outside viewport and adds new ones in it. We figure out the ideal tile ids
+    // constructor              -   on data event callback
+    // Evented fire             -   event is type "data" with dataType "source"
     _loadTile(tile: Tile, callback: Callback<void>) {
+        // The one place that calls loadTile on the source
         return this._source.loadTile(tile, callback);
     }
 
@@ -770,6 +779,7 @@ class SourceCache extends Evented {
      * Add a tile, given its coordinate, to the pyramid.
      * @private
      */
+    // Called by _updateRetainedTiles
     _addTile(tileID: OverscaledTileID): Tile {
         let tile = this._tiles[tileID.key];
         if (tile)
@@ -791,6 +801,7 @@ class SourceCache extends Evented {
         const cached = tile;
 
         if (!tile) {
+            // If we don't yet have a tile, here is where we decide to load one
             tile = new Tile(tileID, this._source.tileSize * tileID.overscaleFactor());
             this._loadTile(tile, this._tileLoaded.bind(this, tile, tileID.key, tile.state));
         }
