@@ -191,7 +191,13 @@ export class OverscaledTileID {
 function calculateKey(wrap: number, overscaledZ: number, z: number, x: number, y: number): string {
     wrap *= 2;
     if (wrap < 0) wrap = wrap * -1 - 1;
+    // 2 ^ z
     const dim = 1 << z;
+    // Why radix 36 for z?
+    // I think this may be creating something to sort on a z curve?
+    // https://github.com/mapbox/mapbox-gl-js/blob/7697762c92c49a575640fc447bbccea77c239bc5/src/source/tile_id.js#L179
+    // Looks like mourner switched the keys back to numeric, but that hasn't happened here
+    // https://github.com/mapbox/mapbox-gl-js/commit/42fd490a1aa493edfdb9900c9ffa6c68a6a04a13#diff-9ae5db6c32b3ec4988864bfa9a219f2eeeb04d12631d6337505faec040306273
     return (dim * dim * wrap + dim * y + x).toString(36) + z.toString(36) + overscaledZ.toString(36);
 }
 

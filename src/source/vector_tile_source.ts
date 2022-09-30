@@ -63,10 +63,15 @@ class VectorTileSource extends Evented implements Source {
     _tileJSONRequest: Cancelable;
     _loaded: boolean;
 
-    constructor(id: string, options: VectorSourceSpecification & {
-        collectResourceTiming: boolean;
-    }, dispatcher: Dispatcher, eventedParent: Evented) {
+    // Made by create function in source.ts
+    // source.ts   create
+    // SourceCache constructor
+    // Style       addSource
+    // Style       _load
+    // Style       _loadURL
+    constructor(id: string, options: VectorSourceSpecification & { collectResourceTiming: boolean }, dispatcher: Dispatcher, eventedParent: Evented) {
         super();
+
         this.id = id;
         this.dispatcher = dispatcher;
 
@@ -198,6 +203,7 @@ class VectorTileSource extends Evented implements Source {
 
             // Here is where we are telling an actor to load a tile in a worker thread.
             // If we need to fetch data instead from planet-core, this should happen here.
+            // loadTile in the worker is still necessary to do the parsing.
 
             tile.request = tile.actor.send('loadTile', params, done.bind(this));
         } else if (tile.state === 'loading') {

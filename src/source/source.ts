@@ -107,7 +107,9 @@ const sourceTypes = {
  * @param {Dispatcher} dispatcher
  * @returns {Source}
  */
+// Called from the constructor of SourceCache.
 export const create = function(id: string, specification: SourceSpecification, dispatcher: Dispatcher, eventedParent: Evented) {
+    // Constructs a source, such as VectorTileSource.
     const source = new sourceTypes[specification.type](id, (specification as any), dispatcher, eventedParent);
 
     if (source.id !== id) {

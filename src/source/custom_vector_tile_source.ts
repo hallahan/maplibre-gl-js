@@ -19,6 +19,12 @@ export type CustomVectorTileSourceOptions = CustomVectorTileSourceSpecification 
     collectResourceTiming: boolean;
 }
 
+let planet = null
+
+export function setPlanetVectorTilePlugin(planetNode) {
+    planet = planetNode
+}
+
 class CustomVectorTileSource extends Evented implements Source {
     type: 'custom';
     id: string;
@@ -43,6 +49,11 @@ class CustomVectorTileSource extends Evented implements Source {
      * @private
      */
     constructor(id: string, options: CustomVectorTileSourceOptions, dispatcher: Dispatcher, eventedParent: Evented) {
+
+        if (!planet) {
+            console.error('planet-node is missing')
+        }
+
         super();
 
         this.id = id;
@@ -158,6 +169,7 @@ class CustomVectorTileSource extends Evented implements Source {
         return this._pendingLoads === 0;
     }
 
+    // called by SourceCache _loadTile
     loadTile(tile: Tile, callback: Callback<void>) {
         const message = !tile.actor ? 'loadTile' : 'reloadTile';
         tile.actor = this.actor;
@@ -173,6 +185,17 @@ class CustomVectorTileSource extends Evented implements Source {
             showCollisionBoxes: this.map.showCollisionBoxes,
             promoteId: this.promoteId
         };
+
+        // Ok, here is where we definitely need to talk to planet-node via NodeJS
+        if (planet) {
+            const { z, x, y } = tile.tileID.canonical
+            const res = planet.getTile(z, x, y)
+            console.log('res', res)
+        } 
+        // else {
+        //     console.log('planet-node missing')
+        //     debugger
+        // }
 
         tile.request = this.actor.send(message, params, (err, data) => {
             delete tile.request;
