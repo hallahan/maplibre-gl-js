@@ -6,6 +6,7 @@ import GeoJSONWrapper from './geojson_wrapper';
 import vtpbf from 'vt-pbf';
 import geojsonvt from 'geojson-vt';
 import VectorTileWorkerSource from './vector_tile_worker_source';
+import {isWorker} from '../util/util';
 
 import type {
     WorkerTileParameters,
@@ -40,6 +41,14 @@ function loadTile(params: WorkerTileParameters, callback: LoadVectorDataCallback
         return callback(null, null);
     }
 
+    if (isWorker()) {
+        console.log('CustomVectorTileWorkerSource loadTile WORKER')
+    } else {
+        console.log('CustomVectorTileWorkerSource loadTile MAIN')
+    }
+
+    debugger
+
     const geoJSONTile = this._vectorTilePlugin.getTile(canonical.z, canonical.x, canonical.y);
     if (!geoJSONTile) {
         return callback(null, null);
@@ -70,19 +79,11 @@ class CustomVectorTileWorkerSource extends VectorTileWorkerSource {
     _pendingRequest: Cancelable;
     _vectorTilePlugin: VectorTilePlugin;
 
-    constructor(actor: Actor, layerIndex: StyleLayerIndex, availableImages: Array<string>, loadGeoJSON?: LoadGeoJSON | null) {
+    constructor(actor: Actor, layerIndex: StyleLayerIndex, availableImages: Array<string>) {
         super(actor, layerIndex, availableImages, loadTile);
-        
-        if (loadGeoJSON) {
-            this._loadGeoJSON = loadGeoJSON;
-        }
     }
 
-    loadData(params: LoadGeoJSONParameters, callback: Callback<{
-        resourceTiming?: {[_: string]: Array<PerformanceResourceTiming>};
-        abandoned?: boolean;
-    }>) {
-        
+    loadData(params: LoadGeoJSONParameters, callback: Callback<{ resourceTiming?: {[_: string]: Array<PerformanceResourceTiming>}, abandoned?: boolean }>) {
         this._pendingRequest?.cancel();
         if (this._pendingCallback) {
             // Tell the foreground the previous call has been abandoned
