@@ -76,7 +76,8 @@ class Actor {
         // loadData, loadTile is always sent from the main thread.
 
         if (type === 'loadTile') {
-            
+            // the loadTile message is sent by VectorTileSource loadTile
+            // debugger
         }
 
         // https://github.com/mapbox/mapbox-gl-js/issues/8771

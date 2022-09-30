@@ -194,9 +194,13 @@ class VectorTileSource extends Evented implements Source {
 
         if (!tile.actor || tile.state === 'expired') {
             tile.actor = this.dispatcher.getActor();
+            // Here is where we are telling an actor to load a tile in a worker thread.
+            debugger
+            
             tile.request = tile.actor.send('loadTile', params, done.bind(this));
         } else if (tile.state === 'loading') {
             // schedule tile reloading after it has been loaded
+            // Why would we want to reload in this situation?
             tile.reloadCallback = callback;
         } else {
             tile.request = tile.actor.send('reloadTile', params, done.bind(this));
@@ -216,6 +220,7 @@ class VectorTileSource extends Evented implements Source {
                 tile.resourceTiming = data.resourceTiming;
 
             if (this.map._refreshExpiredTiles && data) tile.setExpiryData(data);
+            // painter is just used to get style stuff
             tile.loadVectorData(data, this.map.painter);
 
             cacheEntryPossiblyAdded(this.dispatcher);
