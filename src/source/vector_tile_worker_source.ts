@@ -96,6 +96,7 @@ class VectorTileWorkerSource implements WorkerSource {
      * a `params.url` property) for fetching and producing a VectorTile object.
      * @private
      */
+    // called by loadTile in worker.ts
     loadTile(params: WorkerTileParameters, callback: WorkerTileCallback) {
         const uid = params.uid;
 
@@ -105,8 +106,13 @@ class VectorTileWorkerSource implements WorkerSource {
         const perf = (params && params.request && params.request.collectResourceTiming) ?
             new RequestPerformance(params.request) : false;
 
+        // WorkerTile is mostly tile properties along with a parse method
         const workerTile = this.loading[uid] = new WorkerTile(params);
+        // Calling loadTile in custom_vector_tile_worker_source.ts or loadVectorTile up at the top of this file
         workerTile.abort = this.loadVectorData(params, (err, response) => {
+
+            // Once we have gotten the tile from the load, we process the response. 
+
             delete this.loading[uid];
 
             if (err || !response) {
@@ -130,6 +136,7 @@ class VectorTileWorkerSource implements WorkerSource {
             }
 
             workerTile.vectorTile = response.vectorTile;
+            // Where we execute the parsing logic to set up things like buckets.
             workerTile.parse(response.vectorTile, this.layerIndex, this.availableImages, this.actor, (err, result) => {
                 if (err || !result) return callback(err);
 

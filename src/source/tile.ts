@@ -155,7 +155,12 @@ class Tile {
      * @returns {undefined}
      * @private
      */
+    // called in the done function in loadTile in vector_tile_source
     loadVectorData(data: WorkerTileResult, painter: any, justReloaded?: boolean | null) {
+
+        // debugger
+        // console.log('MAIN thread')
+
         if (this.hasData()) {
             this.unloadVectorData();
         }
@@ -173,7 +178,10 @@ class Tile {
             if (data.rawTileData) {
                 // Only vector tiles have rawTileData, and they won't update it for
                 // 'reloadTile'
+
+                // Only used by draw_debug.ts
                 this.latestRawTileData = data.rawTileData;
+                // But this one I think is used in gl?
                 this.latestFeatureIndex.rawTileData = data.rawTileData;
             } else if (this.latestRawTileData) {
                 // If rawTileData hasn't updated, hold onto a pointer to the last

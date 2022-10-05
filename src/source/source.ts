@@ -79,6 +79,7 @@ import vector from '../source/vector_tile_source';
 import raster from '../source/raster_tile_source';
 import rasterDem from '../source/raster_dem_tile_source';
 import geojson from '../source/geojson_source';
+import custom from '../source/custom_vector_tile_source';
 import video from '../source/video_source';
 import image from '../source/image_source';
 import canvas from '../source/canvas_source';
@@ -90,6 +91,7 @@ const sourceTypes = {
     raster,
     'raster-dem': rasterDem,
     geojson,
+    custom,
     video,
     image,
     canvas
@@ -105,7 +107,9 @@ const sourceTypes = {
  * @param {Dispatcher} dispatcher
  * @returns {Source}
  */
+// Called from the constructor of SourceCache.
 export const create = function(id: string, specification: SourceSpecification, dispatcher: Dispatcher, eventedParent: Evented) {
+    // Constructs a source, such as VectorTileSource.
     const source = new sourceTypes[specification.type](id, (specification as any), dispatcher, eventedParent);
 
     if (source.id !== id) {

@@ -21,7 +21,16 @@ const MIN = -MAX - 1;
  */
 export default function loadGeometry(feature: VectorTileFeature): Array<Array<Point>> {
     const scale = EXTENT / feature.extent;
+
+    // 8192 for GeoJSON, so scale is 1
+    // 4096 for mvt, so scale is 2
+    console.log('extent', feature.extent)
+
+    // calls @mapbox/vector-tile loadGeometry for an MVT
+    // calls geojson_wrapper.ts FeatureWrapper loadGeometry for GeoJSON
     const geometry = feature.loadGeometry();
+
+    // Can we avoid this redundant loop? For example, PVT can guarantee 8192 and that points are clamped already.
     for (let r = 0; r < geometry.length; r++) {
         const ring = geometry[r];
         for (let p = 0; p < ring.length; p++) {

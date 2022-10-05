@@ -71,6 +71,17 @@ class Actor {
         if (callback) {
             this.callbacks[id] = callback;
         }
+
+        // console.log(`actor.send - type: ${type} worker: ${isWorker()}`)
+        // loadData, loadTile is always sent from the main thread.
+
+        if (type === 'loadTile') {
+            // the loadTile message is sent by VectorTileSource loadTile
+            // debugger
+        }
+
+        // https://github.com/mapbox/mapbox-gl-js/issues/8771
+        // https://trac.webkit.org/changeset/262581/webkit
         const buffers: Array<Transferable> = isSafari(this.globalScope) ? undefined : [];
         this.target.postMessage({
             id,
@@ -109,6 +120,21 @@ class Actor {
             return;
         }
 
+        // console.log('actor.receive - data.type', data.type)
+        // <response>
+        // loadTile
+        // getImages
+        // getGlyphs
+        // updateLayers
+        // setImages
+        // geojson.loadData
+        // custom.loadData
+        // enforceCacheSizeLimit
+        // setLayers
+        // syncRTLPluginState
+        // setReferrer
+        // setLayers
+
         if (data.type === '<cancel>') {
             // Remove the original request from the queue. This is only possible if it
             // hasn't been kicked off yet. The id will remain in the queue, but because
@@ -133,16 +159,24 @@ class Actor {
             } else {
                 // In the main thread, process messages immediately so that other work does not slip in
                 // between getting partial data back from workers.
+
+                // console.log('actor.receive - data.type', data.type)
+                // never called from custom-vector-tile.html
+
                 this.processTask(id, data);
             }
         }
     }
 
+    // Called in the onmessage callback in the constructor of ThrottledInvoker
+    // Note that this.process is fed to ThrottledInvoker in the constructor of Actor
     process() {
         if (!this.taskQueue.length) {
             return;
         }
         const id = this.taskQueue.shift();
+        // task.type is loadTile
+        // task.data has options, tileID, type: "custom", etc.
         const task = this.tasks[id];
         delete this.tasks[id];
         // Schedule another process call if we know there's more to process _before_ invoking the
@@ -159,6 +193,7 @@ class Actor {
         this.processTask(id, task);
     }
 
+    // Called by process (method above)
     processTask(id: number, task: any) {
         if (task.type === '<response>') {
             // The done() function in the counterpart has been called, and we are now
@@ -194,6 +229,8 @@ class Actor {
             const params = (deserialize(task.data) as any);
             if (this.parent[task.type]) {
                 // task.type == 'loadTile', 'removeTile', etc.
+                // Where we call loadTile in worker.ts
+                // The parent is the instance of worker.ts which has a reference to this actor
                 callback = this.parent[task.type](task.sourceMapId, params, done);
             } else if (this.parent.getWorkerSource) {
                 // task.type == sourcetype.method

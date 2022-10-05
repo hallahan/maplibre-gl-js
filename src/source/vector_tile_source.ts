@@ -63,10 +63,15 @@ class VectorTileSource extends Evented implements Source {
     _tileJSONRequest: Cancelable;
     _loaded: boolean;
 
-    constructor(id: string, options: VectorSourceSpecification & {
-        collectResourceTiming: boolean;
-    }, dispatcher: Dispatcher, eventedParent: Evented) {
+    // Made by create function in source.ts
+    // source.ts   create
+    // SourceCache constructor
+    // Style       addSource
+    // Style       _load
+    // Style       _loadURL
+    constructor(id: string, options: VectorSourceSpecification & { collectResourceTiming: boolean }, dispatcher: Dispatcher, eventedParent: Evented) {
         super();
+
         this.id = id;
         this.dispatcher = dispatcher;
 
@@ -176,6 +181,7 @@ class VectorTileSource extends Evented implements Source {
         return extend({}, this._options);
     }
 
+    // called by SourceCache _loadTile
     loadTile(tile: Tile, callback: Callback<void>) {
         const url = tile.tileID.canonical.url(this.tiles, this.map.getPixelRatio(), this.scheme);
         const params = {
@@ -194,9 +200,15 @@ class VectorTileSource extends Evented implements Source {
 
         if (!tile.actor || tile.state === 'expired') {
             tile.actor = this.dispatcher.getActor();
+
+            // Here is where we are telling an actor to load a tile in a worker thread.
+            // If we need to fetch data instead from planet-core, this should happen here.
+            // loadTile in the worker is still necessary to do the parsing.
+
             tile.request = tile.actor.send('loadTile', params, done.bind(this));
         } else if (tile.state === 'loading') {
             // schedule tile reloading after it has been loaded
+            // Why would we want to reload in this situation?
             tile.reloadCallback = callback;
         } else {
             tile.request = tile.actor.send('reloadTile', params, done.bind(this));
@@ -216,6 +228,10 @@ class VectorTileSource extends Evented implements Source {
                 tile.resourceTiming = data.resourceTiming;
 
             if (this.map._refreshExpiredTiles && data) tile.setExpiryData(data);
+
+            // painter is just used to get style stuff
+            // This is loadVectorData with the main thread tile. 
+            // This done function is called in main after loadTile is done and the response has been parsed.
             tile.loadVectorData(data, this.map.painter);
 
             cacheEntryPossiblyAdded(this.dispatcher);

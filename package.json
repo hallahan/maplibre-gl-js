@@ -11,7 +11,6 @@
     "url": "git://github.com/maplibre/maplibre-gl-js.git"
   },
   "types": "dist/maplibre-gl.d.ts",
-  "type": "module",
   "dependencies": {
     "@mapbox/geojson-rewind": "^0.5.2",
     "@mapbox/jsonlint-lines-primitives": "^2.0.2",
